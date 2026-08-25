@@ -14,6 +14,7 @@
     <nav class="mode-tabs">
       <button class="mode-tab active" data-mode="planner">Multi-Stop Planner</button>
       <button class="mode-tab" data-mode="alternatives">Route Alternatives</button>
+      <button class="mode-tab" data-mode="elevation">Elevation Profile</button>
     </nav>
   </header>
 
@@ -29,8 +30,10 @@
       <div class="panel-actions">
         <button id="optimize-btn" disabled>Optimize Order</button>
         <button id="clear-planner-btn" class="secondary">Clear</button>
+        <button id="share-planner-btn" class="secondary" disabled>Share</button>
       </div>
       <div id="planner-summary" class="route-summary"></div>
+      <div id="planner-share-box" class="share-box hidden"></div>
       <div id="planner-status" class="status-message"></div>
     </aside>
 
@@ -46,16 +49,46 @@
       <ul id="route-cards" class="route-cards"></ul>
       <div class="panel-actions">
         <button id="clear-alternatives-btn" class="secondary">Clear</button>
+        <button id="share-alternatives-btn" class="secondary" disabled>Share</button>
       </div>
+      <div id="alternatives-share-box" class="share-box hidden"></div>
       <div id="alternatives-status" class="status-message"></div>
+    </aside>
+
+    <aside id="elevation-panel" class="side-panel hidden">
+      <div class="panel-header">
+        <h2>Elevation Profile</h2>
+        <span class="hint">Click map to set Start, then End</span>
+      </div>
+      <div class="profile-select">
+        <label><input type="radio" name="elevation-profile" value="foot" checked /> Walking</label>
+        <label><input type="radio" name="elevation-profile" value="bike" /> Cycling</label>
+      </div>
+      <div class="endpoint-labels">
+        <div><span class="dot start-dot"></span> Start: <span id="elev-start-label">not set</span></div>
+        <div><span class="dot end-dot"></span> End: <span id="elev-end-label">not set</span></div>
+      </div>
+      <div id="elevation-summary" class="route-summary"></div>
+      <div class="chart-container">
+        <canvas id="elevation-chart" height="160"></canvas>
+      </div>
+      <div class="panel-actions">
+        <button id="clear-elevation-btn" class="secondary">Clear</button>
+        <button id="share-elevation-btn" class="secondary" disabled>Share</button>
+      </div>
+      <div id="elevation-share-box" class="share-box hidden"></div>
+      <div id="elevation-status" class="status-message"></div>
     </aside>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="js/map.js"></script>
   <script src="js/waypoints.js"></script>
   <script src="js/route-planner.js"></script>
   <script src="js/alternatives.js"></script>
+  <script src="js/elevation.js"></script>
+  <script src="js/share.js"></script>
 </body>
 </html>

@@ -225,3 +225,46 @@ button.secondary {
 .leaflet-marker-icon.waypoint-icon {
   filter: none;
 }
+
+.profile-select {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  margin: 0.6rem 0;
+}
+
+.profile-select label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+
+.chart-container {
+  margin-top: 0.75rem;
+}
+
+.share-box {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.share-box.hidden {
+  display: none;
+}
+
+.share-box input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #374151;
+  background: #fff;
+}
+
+.share-box button {
+  flex-shrink: 0;
+}

@@ -104,6 +104,7 @@ async function fetchAlternatives() {
 
     map.fitBounds(L.featureGroup(Alternatives.routes.map((r) => r.polyline)).getBounds(), { padding: [30, 30] });
     renderRouteCards();
+    document.getElementById('share-alternatives-btn').disabled = false;
   } catch (err) {
     alternativesStatusEl.textContent = 'Could not reach the server.';
   }
@@ -152,6 +153,8 @@ function clearAlternatives() {
   endLabelEl.textContent = 'not set';
   routeCardsEl.innerHTML = '';
   alternativesStatusEl.textContent = '';
+  document.getElementById('share-alternatives-btn').disabled = true;
+  document.getElementById('alternatives-share-box').classList.add('hidden');
 }
 
 clearAlternativesBtn.addEventListener('click', clearAlternatives);

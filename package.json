@@ -1,7 +1,7 @@
 {
   "name": "route-nav-portfolio",
   "version": "1.0.0",
-  "description": "Portfolio route navigation app — multi-stop planner with optimization and route alternatives comparison, built on Express + Leaflet + OSRM.",
+  "description": "Portfolio route navigation app — multi-stop planner, route alternatives, elevation profiles, and shareable route links, built on Express + Leaflet + OSRM.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

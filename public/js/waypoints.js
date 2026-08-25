@@ -48,6 +48,8 @@ function renderWaypointList() {
   });
 
   optimizeBtn.disabled = Planner.waypoints.length < MIN_WAYPOINTS;
+  document.getElementById('share-planner-btn').disabled = Planner.waypoints.length < MIN_WAYPOINTS;
+  document.getElementById('planner-share-box').classList.add('hidden');
 }
 
 function addWaypoint(latlng) {

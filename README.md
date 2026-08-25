@@ -1,8 +1,9 @@
 # Route Navigator
 
 A portfolio route-navigation web app built on open-source tools: multi-stop route
-planning with drag-to-reorder and one-click TSP optimization, plus side-by-side
-comparison of alternative routes between two points.
+planning with drag-to-reorder and one-click TSP optimization, side-by-side comparison
+of alternative routes, an elevation profile for walking/cycling routes, and
+shareable route links.
 
 ## Features
 
@@ -15,6 +16,15 @@ alternative routes rendered simultaneously in distinct colors, with a side panel
 comparing distance and duration for each. Click a route card to highlight that route
 on the map.
 
+**Elevation profile** — pick a walking or cycling route between two points and see
+its elevation profile as a chart. Hovering the chart moves a marker along the route
+on the map, and hovering the route line on the map highlights the matching point on
+the chart.
+
+**Save-and-share via URL** — each of the three tools has a "Share" button that encodes
+the current route (waypoints, or start/end + profile) into a URL. Opening that URL
+recomputes and displays the same route — no backend storage involved.
+
 ## Stack
 
 - **Backend:** Node.js + Express, acting as a thin proxy to the routing engine (keeps
@@ -26,9 +36,13 @@ on the map.
   with a local `.osm.pbf` extract would be the natural next step for real usage.
 - **Basemap tiles:** OpenStreetMap standard tile layer. This app is low-traffic and
   respects [OSM's tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
+- **Elevation data:** [Open-Elevation](https://open-elevation.com/) public API, proxied
+  through the backend the same way as OSRM. Also a free, shared, best-effort public
+  instance — expect occasional slow responses or downtime.
 - **Frontend:** Plain HTML/CSS/vanilla JS + [Leaflet.js](https://leafletjs.com/) (via
   CDN, no build step).
 - **Drag-to-reorder:** [SortableJS](https://sortablejs.github.io/Sortable/) (via CDN).
+- **Elevation chart:** [Chart.js](https://www.chartjs.org/) (via CDN).
 
 ## Setup
 
@@ -51,15 +65,24 @@ provider only.
   side panel to highlight that route on the map (click again, or an empty card slot, to
   reset). If OSRM has only one route for a given pair, the panel says so instead of
   showing an empty state.
+- **Elevation Profile tab:** choose Walking or Cycling, then click a start and end
+  point. The route draws on the map and its elevation profile draws below the panel.
+  Hover the chart to move a marker along the route; hover the route line to highlight
+  the matching point on the chart.
+- **Share button:** appears once a tab has a complete route. Click it to generate a
+  URL encoding that route's state; copy it and open it (in this tab or a new one) to
+  restore the exact same route.
 
 ## Screenshots
 
 _Add 2–3 screenshots or a short GIF here showing the planner in manual mode, the
-planner after optimizing, and the alternatives comparison view._
+planner after optimizing, the alternatives comparison view, and the elevation chart._
 
 ## Future Work
 
 - Self-host OSRM with a local `.osm.pbf` extract instead of relying on the shared
   public demo server, for reliability and production-readiness.
 - Address search / geocoding (e.g. via Nominatim) instead of click-to-set pins.
-- No-go-zone routing — let users mark areas to avoid and route around them.
+- No-go-zone routing — let users draw an area to avoid on the map and recompute the
+  route around it (needs a routing engine with avoid-polygon support, e.g.
+  GraphHopper's hosted API, since OSRM doesn't support this out of the box).

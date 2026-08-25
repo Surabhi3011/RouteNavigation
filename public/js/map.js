@@ -12,6 +12,7 @@ let currentMode = 'planner';
 const modeTabs = document.querySelectorAll('.mode-tab');
 const plannerPanel = document.getElementById('planner-panel');
 const alternativesPanel = document.getElementById('alternatives-panel');
+const elevationPanel = document.getElementById('elevation-panel');
 
 modeTabs.forEach((tab) => {
   tab.addEventListener('click', () => {
@@ -19,6 +20,7 @@ modeTabs.forEach((tab) => {
     modeTabs.forEach((t) => t.classList.toggle('active', t === tab));
     plannerPanel.classList.toggle('hidden', currentMode !== 'planner');
     alternativesPanel.classList.toggle('hidden', currentMode !== 'alternatives');
+    elevationPanel.classList.toggle('hidden', currentMode !== 'elevation');
   });
 });
 
@@ -27,5 +29,7 @@ map.on('click', (e) => {
     window.plannerOnMapClick(e.latlng);
   } else if (currentMode === 'alternatives') {
     window.alternativesOnMapClick(e.latlng);
+  } else if (currentMode === 'elevation') {
+    window.elevationOnMapClick(e.latlng);
   }
 });
