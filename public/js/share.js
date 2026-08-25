@@ -20,14 +20,24 @@ function buildShareUrl(payload) {
   return url.toString();
 }
 
+const COPY_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+
 function showShareBox(boxEl, url) {
   boxEl.classList.remove('hidden');
-  boxEl.innerHTML = '<input type="text" readonly /><button class="copy-share-btn">Copy</button>';
+  boxEl.innerHTML = `<input type="text" readonly /><button class="copy-share-btn">${COPY_ICON_SVG}<span>Copy</span></button>`;
   const input = boxEl.querySelector('input');
   input.value = url;
-  boxEl.querySelector('.copy-share-btn').addEventListener('click', () => {
+  const copyBtn = boxEl.querySelector('.copy-share-btn');
+  const copyLabel = copyBtn.querySelector('span');
+  copyBtn.addEventListener('click', () => {
     input.select();
     navigator.clipboard.writeText(url).catch(() => {});
+    copyLabel.textContent = 'Copied';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyLabel.textContent = 'Copy';
+      copyBtn.classList.remove('copied');
+    }, 1500);
   });
 }
 

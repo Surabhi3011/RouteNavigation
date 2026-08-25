@@ -1,6 +1,6 @@
 // Feature 2: click-to-set start/end, fetch route alternatives, render + compare.
 
-const ROUTE_COLORS = ['#2563eb', '#f59e0b', '#7c3aed']; // colorblind-safe, distinct from planner blue
+const ROUTE_COLORS = ['#4f46e5', '#f59e0b', '#a855f7']; // colorblind-safe, matches --color-route-* tokens
 // Bumped on every fetch/clear so a Clear during an in-flight request can't
 // have that request's routes reappear on the map after it resolves.
 let alternativesRequestId = 0;
@@ -31,26 +31,12 @@ function alternativesOnMapClick(latlng) {
   if (!Alternatives.start) {
     Alternatives.start = latlng;
     if (Alternatives.startMarker) map.removeLayer(Alternatives.startMarker);
-    Alternatives.startMarker = L.marker(latlng, {
-      icon: L.divIcon({
-        className: 'waypoint-icon',
-        html: '<div style="background:#16a34a;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">S</div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      }),
-    }).addTo(map);
+    Alternatives.startMarker = L.marker(latlng, { icon: createPinIcon('S', 'var(--color-start)', 24) }).addTo(map);
     startLabelEl.textContent = `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
   } else if (!Alternatives.end) {
     Alternatives.end = latlng;
     if (Alternatives.endMarker) map.removeLayer(Alternatives.endMarker);
-    Alternatives.endMarker = L.marker(latlng, {
-      icon: L.divIcon({
-        className: 'waypoint-icon',
-        html: '<div style="background:#dc2626;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">E</div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      }),
-    }).addTo(map);
+    Alternatives.endMarker = L.marker(latlng, { icon: createPinIcon('E', 'var(--color-end)', 24) }).addTo(map);
     endLabelEl.textContent = `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
     fetchAlternatives();
   } else {
@@ -127,6 +113,7 @@ function renderRouteCards() {
   Alternatives.routes.forEach((route) => {
     const li = document.createElement('li');
     li.className = 'route-card' + (Alternatives.selectedId === route.id ? ' selected' : '');
+    li.style.setProperty('--card-color', route.color);
     li.innerHTML = `
       <span class="swatch" style="background:${route.color}"></span>
       <strong>Route ${route.id + 1}</strong>

@@ -34,8 +34,11 @@ recomputes and displays the same route — no backend storage involved.
   (`https://router.project-osrm.org`). This is a **shared public instance not meant for
   production traffic** — fine for a low-volume portfolio demo, but self-hosting OSRM
   with a local `.osm.pbf` extract would be the natural next step for real usage.
-- **Basemap tiles:** OpenStreetMap standard tile layer. This app is low-traffic and
-  respects [OSM's tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
+- **Basemap tiles:** [CARTO Positron](https://carto.com/basemaps) — a free,
+  no-key-required light basemap with muted styling that lets the route lines and pins
+  stand out. Data underneath is still OpenStreetMap, so both OSM's and CARTO's
+  attribution appear on the map; this app is low-traffic and stays within their
+  free-tier usage policies.
 - **Elevation data:** [Open-Elevation](https://open-elevation.com/) public API, proxied
   through the backend the same way as OSRM. Also a free, shared, best-effort public
   instance — expect occasional slow responses or downtime.

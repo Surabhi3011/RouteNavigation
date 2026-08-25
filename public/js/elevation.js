@@ -58,26 +58,12 @@ function elevationOnMapClick(latlng) {
   if (!Elevation.start) {
     Elevation.start = latlng;
     if (Elevation.startMarker) map.removeLayer(Elevation.startMarker);
-    Elevation.startMarker = L.marker(latlng, {
-      icon: L.divIcon({
-        className: 'waypoint-icon',
-        html: '<div style="background:#16a34a;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">S</div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      }),
-    }).addTo(map);
+    Elevation.startMarker = L.marker(latlng, { icon: createPinIcon('S', 'var(--color-start)', 24) }).addTo(map);
     elevStartLabelEl.textContent = `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
   } else if (!Elevation.end) {
     Elevation.end = latlng;
     if (Elevation.endMarker) map.removeLayer(Elevation.endMarker);
-    Elevation.endMarker = L.marker(latlng, {
-      icon: L.divIcon({
-        className: 'waypoint-icon',
-        html: '<div style="background:#dc2626;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">E</div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      }),
-    }).addTo(map);
+    Elevation.endMarker = L.marker(latlng, { icon: createPinIcon('E', 'var(--color-end)', 24) }).addTo(map);
     elevEndLabelEl.textContent = `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
     fetchElevationProfile();
   }
@@ -177,7 +163,7 @@ function renderSummary(route, sampledPoints) {
 function drawElevationRoute(coordinates) {
   if (Elevation.routePolyline) map.removeLayer(Elevation.routePolyline);
   const latlngs = coordinates.map(([lng, lat]) => [lat, lng]);
-  Elevation.routePolyline = L.polyline(latlngs, { color: '#059669', weight: 5 }).addTo(map);
+  Elevation.routePolyline = L.polyline(latlngs, { color: '#0d9488', weight: 5 }).addTo(map);
   map.fitBounds(Elevation.routePolyline.getBounds(), { padding: [30, 30] });
 
   Elevation.routePolyline.on('mousemove', onRouteHover);
@@ -220,7 +206,7 @@ function showHoverMarker(point) {
       radius: 7,
       color: '#fff',
       weight: 2,
-      fillColor: '#059669',
+      fillColor: '#0d9488',
       fillOpacity: 1,
     }).addTo(map);
   } else {
@@ -248,8 +234,8 @@ function renderChart(sampledPoints) {
       datasets: [{
         label: 'Elevation (m)',
         data: sampledPoints.map((p) => p.elevationMeters),
-        borderColor: '#059669',
-        backgroundColor: 'rgba(5, 150, 105, 0.15)',
+        borderColor: '#0d9488',
+        backgroundColor: 'rgba(13, 148, 136, 0.14)',
         fill: true,
         pointRadius: 0,
         tension: 0.2,
@@ -259,11 +245,30 @@ function renderChart(sampledPoints) {
       responsive: true,
       animation: false,
       interaction: { mode: 'index', intersect: false },
+      font: { family: "'Inter', sans-serif" },
       scales: {
-        x: { title: { display: true, text: 'Distance (km)' } },
-        y: { title: { display: true, text: 'Elevation (m)' } },
+        x: {
+          title: { display: true, text: 'Distance (km)', font: { family: "'Inter', sans-serif", size: 11 }, color: '#98a2b3' },
+          ticks: { font: { family: "'Inter', sans-serif", size: 10 }, color: '#98a2b3' },
+          grid: { color: 'rgba(15, 23, 42, 0.06)' },
+        },
+        y: {
+          title: { display: true, text: 'Elevation (m)', font: { family: "'Inter', sans-serif", size: 11 }, color: '#98a2b3' },
+          ticks: { font: { family: "'Inter', sans-serif", size: 10 }, color: '#98a2b3' },
+          grid: { color: 'rgba(15, 23, 42, 0.06)' },
+        },
       },
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#10162a',
+          titleFont: { family: "'Inter', sans-serif", weight: '600' },
+          bodyFont: { family: "'Inter', sans-serif" },
+          padding: 8,
+          cornerRadius: 8,
+          displayColors: false,
+        },
+      },
       onHover: (event, elements) => {
         if (elements.length > 0) {
           showHoverMarker(sampledPoints[elements[0].index]);

@@ -14,15 +14,11 @@ const optimizeBtn = document.getElementById('optimize-btn');
 const clearPlannerBtn = document.getElementById('clear-planner-btn');
 const plannerStatusEl = document.getElementById('planner-status');
 
+const REMOVE_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const DRAG_HANDLE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>';
+
 function makeNumberedIcon(number) {
-  return L.divIcon({
-    className: 'waypoint-icon',
-    html: `<div style="background:#2563eb;color:#fff;border-radius:50%;width:26px;height:26px;
-      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;
-      border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${number}</div>`,
-    iconSize: [26, 26],
-    iconAnchor: [13, 13],
-  });
+  return createPinIcon(number, 'var(--color-primary)');
 }
 
 function renumberMarkers() {
@@ -40,8 +36,8 @@ function renderWaypointList() {
     li.innerHTML = `
       <span class="badge">${i + 1}</span>
       <span class="label">Stop ${i + 1} (${wp.lat.toFixed(4)}, ${wp.lng.toFixed(4)})</span>
-      <button class="remove-btn" title="Remove">&times;</button>
-      <span class="drag-handle">&#9776;</span>
+      <button class="remove-btn" title="Remove">${REMOVE_ICON_SVG}</button>
+      <span class="drag-handle">${DRAG_HANDLE_SVG}</span>
     `;
     li.querySelector('.remove-btn').addEventListener('click', () => removeWaypoint(i));
     waypointListEl.appendChild(li);
