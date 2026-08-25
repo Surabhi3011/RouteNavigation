@@ -1,6 +1,9 @@
 // Feature 2: click-to-set start/end, fetch route alternatives, render + compare.
 
 const ROUTE_COLORS = ['#2563eb', '#f59e0b', '#7c3aed']; // colorblind-safe, distinct from planner blue
+// Bumped on every fetch/clear so a Clear during an in-flight request can't
+// have that request's routes reappear on the map after it resolves.
+let alternativesRequestId = 0;
 
 const Alternatives = {
   start: null,
@@ -63,6 +66,7 @@ function clearRoutePolylines() {
 }
 
 async function fetchAlternatives() {
+  const requestId = ++alternativesRequestId;
   alternativesStatusEl.textContent = '';
   routeCardsEl.innerHTML = '';
   clearRoutePolylines();
@@ -81,6 +85,7 @@ async function fetchAlternatives() {
       body: JSON.stringify({ coordinates }),
     });
     const data = await res.json();
+    if (requestId !== alternativesRequestId) return; // superseded by a Clear
     if (!res.ok) {
       alternativesStatusEl.textContent = data.error || 'Failed to fetch routes.';
       return;
@@ -98,7 +103,13 @@ async function fetchAlternatives() {
         weight: i === 0 ? 6 : 4,
         opacity: 0.85,
       }).addTo(map);
-      polyline.on('click', () => selectRoute(route.id));
+      // Stop propagation so this click doesn't also reach the map's click
+      // handler, which would immediately reset the selection right back to
+      // null (start/end are already set once routes exist).
+      polyline.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        selectRoute(route.id);
+      });
       return { ...route, polyline, color };
     });
 
@@ -106,6 +117,7 @@ async function fetchAlternatives() {
     renderRouteCards();
     document.getElementById('share-alternatives-btn').disabled = false;
   } catch (err) {
+    if (requestId !== alternativesRequestId) return;
     alternativesStatusEl.textContent = 'Could not reach the server.';
   }
 }
@@ -140,6 +152,7 @@ function selectRoute(id) {
 }
 
 function clearAlternatives() {
+  alternativesRequestId++; // invalidate any in-flight fetch
   if (Alternatives.startMarker) map.removeLayer(Alternatives.startMarker);
   if (Alternatives.endMarker) map.removeLayer(Alternatives.endMarker);
   clearRoutePolylines();

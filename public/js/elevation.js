@@ -1,6 +1,10 @@
 // Feature 3: elevation profile for walking/cycling routes, chart <-> map hover sync.
 
 const ELEVATION_SAMPLE_COUNT = 50;
+// Bumped on every fetch/clear so a slow, superseded response (e.g. from
+// rapidly toggling Walking/Cycling, or a Clear mid-fetch) can't overwrite
+// newer state.
+let elevationRequestId = 0;
 
 const Elevation = {
   start: null,
@@ -81,6 +85,23 @@ function elevationOnMapClick(latlng) {
 }
 
 async function fetchElevationProfile() {
+  const requestId = ++elevationRequestId;
+
+  // Clear any previous route/chart up front (e.g. when switching profile)
+  // so a failed fetch below can't leave a stale chart mismatched with the
+  // new profile and the error message.
+  if (Elevation.routePolyline) {
+    map.removeLayer(Elevation.routePolyline);
+    Elevation.routePolyline = null;
+  }
+  hideHoverMarker();
+  if (Elevation.chart) {
+    Elevation.chart.destroy();
+    Elevation.chart = null;
+  }
+  Elevation.sampledPoints = [];
+  document.getElementById('share-elevation-btn').disabled = true;
+
   elevationStatusEl.textContent = 'Loading route and elevation data...';
   elevationSummaryEl.textContent = '';
 
@@ -97,6 +118,7 @@ async function fetchElevationProfile() {
       body: JSON.stringify({ coordinates, profile }),
     });
     const routeData = await routeRes.json();
+    if (requestId !== elevationRequestId) return; // superseded by a newer request or a Clear
     if (!routeRes.ok) {
       elevationStatusEl.textContent = routeData.error || 'Failed to fetch route.';
       return;
@@ -104,6 +126,11 @@ async function fetchElevationProfile() {
 
     const route = routeData.routes[0];
     drawElevationRoute(route.geometry.coordinates);
+    renderSummary(route, null);
+    // A valid route is on the map at this point — sharing only needs
+    // start/end/profile (the share link recomputes everything), so it
+    // shouldn't stay disabled just because the elevation lookup below fails.
+    document.getElementById('share-elevation-btn').disabled = false;
 
     Elevation.sampledPoints = sampleGeometry(route.geometry.coordinates);
 
@@ -113,9 +140,9 @@ async function fetchElevationProfile() {
       body: JSON.stringify({ points: Elevation.sampledPoints.map((p) => [p.lat, p.lng]) }),
     });
     const elevData = await elevRes.json();
+    if (requestId !== elevationRequestId) return;
     if (!elevRes.ok) {
       elevationStatusEl.textContent = elevData.error || 'Route loaded, but elevation data is unavailable right now.';
-      renderSummary(route, null);
       return;
     }
 
@@ -126,8 +153,8 @@ async function fetchElevationProfile() {
     elevationStatusEl.textContent = '';
     renderSummary(route, Elevation.sampledPoints);
     renderChart(Elevation.sampledPoints);
-    document.getElementById('share-elevation-btn').disabled = false;
   } catch (err) {
+    if (requestId !== elevationRequestId) return;
     elevationStatusEl.textContent = 'Could not reach the server.';
   }
 }
@@ -251,6 +278,7 @@ function renderChart(sampledPoints) {
 }
 
 function clearElevation() {
+  elevationRequestId++; // invalidate any in-flight fetch
   if (Elevation.startMarker) map.removeLayer(Elevation.startMarker);
   if (Elevation.endMarker) map.removeLayer(Elevation.endMarker);
   if (Elevation.routePolyline) map.removeLayer(Elevation.routePolyline);

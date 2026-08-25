@@ -11,10 +11,33 @@ function coordsToOsrmPath(coordinates) {
   return coordinates.map(([lng, lat]) => `${lng},${lat}`).join(';');
 }
 
+function isValidLatLngPair(lat, lng) {
+  return Number.isFinite(lat) && Number.isFinite(lng) &&
+    lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+}
+
+// coordinates arrays (OSRM) use [lng, lat]; points arrays (elevation) use [lat, lng] — do not conflate the two.
+function isValidLngLatEntry(entry) {
+  return Array.isArray(entry) && entry.length === 2 && isValidLatLngPair(entry[1], entry[0]);
+}
+
+function isValidLatLngEntry(entry) {
+  return Array.isArray(entry) && entry.length === 2 && isValidLatLngPair(entry[0], entry[1]);
+}
+
+// Validates a body.coordinates array of [lng, lat] pairs. Every entry must be
+// checked before it reaches coordsToOsrmPath's destructuring — an entry that
+// isn't array-like (e.g. a bare number) throws synchronously outside any
+// try/catch, which crashes the whole server since Express 4 doesn't catch
+// rejected promises from async route handlers.
 function validateCoordinates(body, res) {
   const coordinates = body && body.coordinates;
   if (!Array.isArray(coordinates) || coordinates.length < 2) {
     res.status(400).json({ error: 'coordinates must be an array with at least 2 [lng, lat] entries' });
+    return null;
+  }
+  if (!coordinates.every(isValidLngLatEntry)) {
+    res.status(400).json({ error: 'each coordinate must be a [lng, lat] pair of finite numbers within valid ranges' });
     return null;
   }
   return coordinates;
@@ -99,6 +122,12 @@ router.post('/elevation', async (req, res) => {
   }
   if (points.length > MAX_ELEVATION_POINTS) {
     return res.status(400).json({ error: `points must not exceed ${MAX_ELEVATION_POINTS} entries` });
+  }
+  // points are [lat, lng] (elevation lookups are keyed by lat first, unlike
+  // OSRM's [lng, lat] convention) — same non-array-entry crash risk as
+  // coordinates above, so validate before destructuring.
+  if (!points.every(isValidLatLngEntry)) {
+    return res.status(400).json({ error: 'each point must be a [lat, lng] pair of finite numbers within valid ranges' });
   }
 
   const locations = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }));

@@ -1,6 +1,10 @@
 // Feature 1: calls /api/route (manual mode) and /api/trip (optimize), renders route.
 
 let plannerPolyline = null;
+// Bumped on every state-changing action (add/remove/reorder/clear/optimize) so
+// a slower, older fetch response can't overwrite a newer one — or reappear
+// after the user has already cleared the waypoints.
+let plannerRequestId = 0;
 const optimizeBtnEl = document.getElementById('optimize-btn');
 const plannerSummaryEl = document.getElementById('planner-summary');
 const plannerStatusEl2 = document.getElementById('planner-status');
@@ -21,6 +25,7 @@ function formatSummary(distanceMeters, durationSeconds) {
 }
 
 async function updateManualRoute() {
+  const requestId = ++plannerRequestId;
   plannerStatusEl2.textContent = '';
   if (Planner.waypoints.length < MIN_WAYPOINTS) {
     if (plannerPolyline) {
@@ -39,6 +44,7 @@ async function updateManualRoute() {
       body: JSON.stringify({ coordinates }),
     });
     const data = await res.json();
+    if (requestId !== plannerRequestId) return; // superseded by a newer edit or a Clear
     if (!res.ok) {
       plannerStatusEl2.textContent = data.error || 'Failed to fetch route.';
       return;
@@ -47,12 +53,14 @@ async function updateManualRoute() {
     drawPlannerRoute(primary.geometry.coordinates);
     plannerSummaryEl.innerHTML = formatSummary(primary.distanceMeters, primary.durationSeconds);
   } catch (err) {
+    if (requestId !== plannerRequestId) return;
     plannerStatusEl2.textContent = 'Could not reach the server.';
   }
 }
 
 async function optimizeOrder() {
   if (Planner.waypoints.length < MIN_WAYPOINTS) return;
+  const requestId = ++plannerRequestId; // invalidate any in-flight manual-mode fetch
   plannerStatusEl2.textContent = '';
   optimizeBtnEl.disabled = true;
 
@@ -64,6 +72,7 @@ async function optimizeOrder() {
       body: JSON.stringify({ coordinates }),
     });
     const data = await res.json();
+    if (requestId !== plannerRequestId) return; // superseded by a newer edit or a Clear
     if (!res.ok) {
       plannerStatusEl2.textContent = data.error || 'Failed to optimize order.';
       return;
@@ -82,9 +91,12 @@ async function optimizeOrder() {
     drawPlannerRoute(data.geometry.coordinates);
     plannerSummaryEl.innerHTML = formatSummary(data.distanceMeters, data.durationSeconds);
   } catch (err) {
+    if (requestId !== plannerRequestId) return;
     plannerStatusEl2.textContent = 'Could not reach the server.';
   } finally {
-    optimizeBtnEl.disabled = Planner.waypoints.length < MIN_WAYPOINTS;
+    if (requestId === plannerRequestId) {
+      optimizeBtnEl.disabled = Planner.waypoints.length < MIN_WAYPOINTS;
+    }
   }
 }
 
