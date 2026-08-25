@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Navigator</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Route Navigator</h1>
+    <nav class="mode-tabs">
+      <button class="mode-tab active" data-mode="planner">Multi-Stop Planner</button>
+      <button class="mode-tab" data-mode="alternatives">Route Alternatives</button>
+    </nav>
+  </header>
+
+  <main class="app-main">
+    <div id="map"></div>
+
+    <aside id="planner-panel" class="side-panel">
+      <div class="panel-header">
+        <h2>Waypoints</h2>
+        <span class="hint">Click the map to add a stop (2–5)</span>
+      </div>
+      <ol id="waypoint-list" class="waypoint-list"></ol>
+      <div class="panel-actions">
+        <button id="optimize-btn" disabled>Optimize Order</button>
+        <button id="clear-planner-btn" class="secondary">Clear</button>
+      </div>
+      <div id="planner-summary" class="route-summary"></div>
+      <div id="planner-status" class="status-message"></div>
+    </aside>
+
+    <aside id="alternatives-panel" class="side-panel hidden">
+      <div class="panel-header">
+        <h2>Route Alternatives</h2>
+        <span class="hint">Click map to set Start, then End</span>
+      </div>
+      <div class="endpoint-labels">
+        <div><span class="dot start-dot"></span> Start: <span id="start-label">not set</span></div>
+        <div><span class="dot end-dot"></span> End: <span id="end-label">not set</span></div>
+      </div>
+      <ul id="route-cards" class="route-cards"></ul>
+      <div class="panel-actions">
+        <button id="clear-alternatives-btn" class="secondary">Clear</button>
+      </div>
+      <div id="alternatives-status" class="status-message"></div>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/waypoints.js"></script>
+  <script src="js/route-planner.js"></script>
+  <script src="js/alternatives.js"></script>
+</body>
+</html>
