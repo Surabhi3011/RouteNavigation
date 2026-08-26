@@ -2,14 +2,20 @@
 
 const map = L.map('map', { zoomControl: false }).setView([51.505, -0.09], 13); // London default view
 
-// CARTO Positron — a free, no-key-required basemap with muted, minimal
-// styling so the route lines/pins stand out against it (the stock OSM tile
-// layer is far busier and doesn't read well behind the glass panel UI).
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 20,
-  subdomains: 'abcd',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-}).addTo(map);
+// Esri World Light Gray Canvas — a free, no-key-required, unlimited-quota
+// basemap with the same muted/minimal look CARTO Positron had. Switched
+// away from CARTO's basemaps.cartocdn.com because its anonymous tier is
+// quota-limited and starts watermarking tiles once real public traffic
+// (e.g. after deploying) crosses its shared free threshold.
+const ESRI_LIGHT_GRAY = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+const ESRI_LIGHT_GRAY_LABELS = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
+const ESRI_ATTRIBUTION = '&copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, DeLorme, NAVTEQ';
+
+L.tileLayer(ESRI_LIGHT_GRAY, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
+// Labels layer stacks on top of the base tiles (both in the default tile
+// pane, added-order determines stacking) but still sits below route
+// polylines/markers, which live in Leaflet's higher-z overlay/marker panes.
+L.tileLayer(ESRI_LIGHT_GRAY_LABELS, { maxZoom: 19 }).addTo(map);
 
 // Default top-left zoom control would collide with the floating brand/tabs bar.
 L.control.zoom({ position: 'bottomleft' }).addTo(map);
